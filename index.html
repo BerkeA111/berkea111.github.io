@@ -3,24 +3,51 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Elit's Büfe Menü</title>
-  <style>
-    html,body{height:100%;margin:0;background:#000}
-    /* iframe tam ekran */
-    iframe{position:fixed;inset:0;width:100%;height:100%;border:0}
-    /* yüklenirken orta mesajı (opsiyonel) */
-    #loading{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;font-family:sans-serif}
-  </style>
+  <title>Elit's Büfe — Menü</title>
+
+  <!-- Hızlı redirect: doğrudan raw GitHub PDF linkine yönlendirir -->
+  <!-- Eğer istersen "rawPdf" değişkenini kendi raw URL'inle değiştir. -->
+  <meta name="robots" content="noindex">
+  <style>html,body{height:100%;margin:0;background:#000;color:#fff;font-family:system-ui,Roboto,Arial}</style>
 </head>
 <body>
-  <div id="loading">Menü yükleniyor…</div>
-  <iframe id="pdf" src="menu.pdf" allowfullscreen onload="document.getElementById('loading').style.display='none'"></iframe>
-
-  <!-- Eğer tarayıcı iframe göstermiyorsa (mobil bazı tarayıcılarda), alttaki JS ile direkt PDF'ye yönlendirme denenir:
   <script>
-    // iframe 2 saniye içinde yüklenmezse dosyaya doğrudan yönlendir
-    setTimeout(()=>{ if(document.getElementById('loading').style.display!=='none') location.href='menu.pdf'; }, 2000);
+    // RAW PDF URL (GitHub raw). Eğer branch'in main değilse "main" kısmını değiştir.
+    const rawPdf = 'https://raw.githubusercontent.com/BerkeA111/berkea111.github.io/main/menu.pdf';
+
+    // iOS tespiti: iOS tarayıcılarında inline gömme sorunları olur -> doğrudan raw linke git
+    function isIOS(){
+      return /iP(hone|od|ad)/.test(navigator.platform) || (navigator.userAgent.includes('Macintosh') && 'ontouchend' in document);
+    }
+
+    // Eğer iframe destekliyorsa (çoğu Android/desktop) iframe göster, değilse doğrudan yönlendir
+    if(isIOS()){
+      // iOS: doğrudan aç
+      window.location.replace(rawPdf);
+    } else {
+      // Diğerleri: iframe ile gömme (bu sayfa ayrıca PDF'yi açmak için link içerir)
+      document.write(`
+        <div style="display:flex;flex-direction:column;height:100%">
+          <div style="padding:8px 12px;background:#111;color:#fff;display:flex;align-items:center;justify-content:space-between">
+            <strong>Elit's Büfe — Menü</strong>
+            <a href="${rawPdf}" target="_blank" rel="noopener" style="color:#000;background:#ffcc00;padding:6px 10px;border-radius:8px;text-decoration:none;font-weight:700">Menüyü yeni sekmede aç</a>
+          </div>
+          <iframe src="menu.pdf" style="flex:1;border:0;width:100%;height:100vh" allowfullscreen></iframe>
+        </div>
+      `);
+
+      // Eğer iframe 4 saniye içinde yüklenmezse raw'a yönlendir (fallback)
+      setTimeout(()=> {
+        // basit kontrol: iframe içeriği yüklenmediyse raw'a yönlendir
+        const f = document.querySelector('iframe');
+        try{
+          // çoğu durumda erişilemezse (CORS/404) raw linke yönlendir
+          if(!f || f.clientHeight === 0) window.location.replace(rawPdf);
+        }catch(e){
+          window.location.replace(rawPdf);
+        }
+      }, 4000);
+    }
   </script>
-  -->
 </body>
 </html>
